@@ -57,6 +57,18 @@
 
 (def not-native nil)
 
+(def ^{:private true
+       :doc "Mapping of JavaScript native types to their protocol names. Internal - do not use!"}
+  base-type
+  (doto (js-obj)
+    (aset nil "null")
+    (aset js/Object "object")
+    (aset js/String "string")
+    (aset js/Number "number")
+    (aset js/Array "array")
+    (aset js/Function "function")
+    (aset js/Boolean "boolean")))
+
 (defn ^boolean identical?
   "Tests if 2 arguments are the same object"
   [x y]

@@ -1917,5 +1917,34 @@
   ;; CLJS-518
   (assert (nil? (:test "test")))
 
+  ;; CLJS-527
+
+  (defprotocol DynExtProto (m [this]))  
+
+  (extend-type number DynExtProto (m [this] :number))
+  (assert (satisfies? DynExtProto 5))
+  (assert (= (m 5) :number))
+
+  (extend-type cljs.core/PersistentVector DynExtProto (m [this] :vec))
+  (assert (satisfies? DynExtProto []))
+  (assert (= (m []) :vec))
+
+  (defn dynextend [x] (extend-type (type x) DynExtProto (m [this] (count this))))
+  (dynextend (seq [1 2 3]))
+  (dynextend (range 5))
+  (dynextend "")
+  (assert (satisfies? DynExtProto (seq '[0])))
+  (assert (satisfies? DynExtProto (range 5)))
+  (assert (satisfies? DynExtProto ""))
+
+  ; making sure the extension isn't made to a js native's protocol
+  (assert (not js/String.prototype.cljs$core_test$DynExtProto$m$arity$1))
+  (assert (aget m "string"))
+  (assert (= ((aget m "string") "a string") 8))
+
+  (assert (= (m (seq [1 2 3])) 3))
+  (assert (= (m (range 5)) 5))
+  (assert (zero? (m "")))
+
   :ok
   )
