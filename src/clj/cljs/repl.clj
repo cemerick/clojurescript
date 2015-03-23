@@ -684,8 +684,7 @@
             #(prn "Error evaluating:" form :as js)
             (constantly nil))
           opts)))
-    (binding [*out* *err*]
-      (.printStackTrace e))))
+    (.printStackTrace e *err*)))
 
 (defn repl*
   [repl-env {:keys [init need-prompt quit-prompt prompt flush read eval print caught reader
