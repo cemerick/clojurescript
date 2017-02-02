@@ -143,8 +143,8 @@
     (last (string/split (path x) #"\/"))))
 
 (defn ^String relative-name
-  "Given a file return a path relative to the working directory. Given a
-   URL return the JAR relative path of the resource."
+  "Given a file or a URL describing a file, return a path relative to the working directory.
+   Given a jar URL return the JAR relative path of the resource."
   [x]
   {:pre [(or (file? x) (url? x))]}
   (letfn [(strip-user-dir [s]
@@ -152,10 +152,12 @@
               (str (System/getProperty "user.dir") File/separator) ""))]
     (if (file? x)
       (strip-user-dir (.getAbsolutePath x))
-      (let [f (.getFile x)]
-        (if (string/includes? f ".jar!/")
-          (last (string/split f #"\.jar!/"))
-          (strip-user-dir f))))))
+      (if (= "file" (.getProtocol x))
+        (recur (io/file (.toURI x)))
+        (let [f (.getFile x)]
+          (if (string/includes? f ".jar!/")
+            (last (string/split f #"\.jar!/"))
+            (strip-user-dir f)))))))
 
 (defn last-modified [src]
   (cond
